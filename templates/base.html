@@ -228,11 +228,6 @@ footer{background:#0a0a0a;padding:4rem 5vw 2rem;border-top:1px solid var(--borde
       </div>
       <button class="form-submit" onclick="submitForm()">Book My Free Session →</button>
     </div>
-    <div class="form-success" id="formSuccess">
-      <div class="check">✅</div>
-      <h3 style="margin-top:1rem">You're booked!</h3>
-      <p>Our team will call you within 24 hours to confirm. See you at MegaSteel!</p>
-    </div>
   </div>
 </div>
 
@@ -257,9 +252,7 @@ function submitForm(){
   var encoded = encodeURIComponent(msg);
   window.open('https://wa.me/918798561817?text=' + encoded, '_blank');
   setTimeout(function(){window.open('https://wa.me/917977140899?text=' + encoded, '_blank');}, 800);
-
-  document.getElementById('trialForm').style.display='none';
-  document.getElementById('formSuccess').style.display='block';
+  closeModal();
 }
 function toggleMenu(){const m=document.getElementById('mobileMenu');const b=document.getElementById('burger');m.classList.toggle('open');b.style.opacity=m.classList.contains('open')?'0.6':'1'}
 // Highlight today in hours tables
