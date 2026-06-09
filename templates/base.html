@@ -239,7 +239,28 @@ footer{background:#0a0a0a;padding:4rem 5vw 2rem;border-top:1px solid var(--borde
 <script>
 function openModal(){document.getElementById('trialModal').classList.add('open')}
 function closeModal(){document.getElementById('trialModal').classList.remove('open');document.getElementById('trialForm').style.display='block';document.getElementById('formSuccess').style.display='none'}
-function submitForm(){document.getElementById('trialForm').style.display='none';document.getElementById('formSuccess').style.display='block'}
+function submitForm(){
+  var name  = document.querySelector('#trialForm input[type="text"]').value.trim();
+  var phone = document.querySelector('#trialForm input[type="tel"]').value.trim();
+  var goal  = document.querySelector('#trialForm select').value;
+
+  if(!name || !phone){alert('Please fill in your name and phone number.');return;}
+
+  var time = new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata',dateStyle:'medium',timeStyle:'short'});
+  var msg  = '🏋️ *New Free Trial Booking — MegaSteel Fitness*\n\n'
+           + '👤 *Name:* ' + name  + '\n'
+           + '📞 *Phone:* ' + phone + '\n'
+           + '🎯 *Goal:* '  + goal  + '\n'
+           + '🕐 *Submitted:* ' + time + '\n\n'
+           + '_Please call the member within 24 hours to confirm their session._';
+
+  var encoded = encodeURIComponent(msg);
+  window.open('https://wa.me/918798561817?text=' + encoded, '_blank');
+  setTimeout(function(){window.open('https://wa.me/917977140899?text=' + encoded, '_blank');}, 800);
+
+  document.getElementById('trialForm').style.display='none';
+  document.getElementById('formSuccess').style.display='block';
+}
 function toggleMenu(){const m=document.getElementById('mobileMenu');const b=document.getElementById('burger');m.classList.toggle('open');b.style.opacity=m.classList.contains('open')?'0.6':'1'}
 // Highlight today in hours tables
 const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
