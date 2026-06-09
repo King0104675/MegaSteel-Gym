@@ -13,6 +13,7 @@
 .plan-features{list-style:none;margin-bottom:2rem}
 .plan-features li{font-size:.88rem;color:var(--chrome);padding:.45rem 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.6rem;font-weight:300}
 .plan-features li::before{content:'→';color:var(--fire);font-weight:600;flex-shrink:0}
+.section-addon-note{font-size:.95rem;color:var(--chrome);margin-top:1.5rem;padding:1rem 1.2rem;border:1px solid var(--border);border-radius:3px;background:rgba(255,255,255,.04)}
 
 .compare-section{background:var(--steel)}
 .compare-table{width:100%;border-collapse:collapse;margin-top:3rem;font-size:.9rem}
@@ -65,6 +66,9 @@
     </div>
     {% endfor %}
   </div>
+  <div class="section-addon-note">
+    Personal training is not included in the standard membership plans. It is available as a separate add-on package for members who want one-on-one coaching, custom programming, and progress tracking.
+  </div>
 </section>
 
 <!-- COMPARISON TABLE -->
@@ -76,19 +80,21 @@
       <thead>
         <tr>
           <th>Feature</th>
-          {% for plan in plans %}<th {% if plan.featured %}class="featured-col"{% endif %}>{{ plan.name }}</th>{% endfor %}
+          {% for plan in compare_plans %}<th {% if plan.featured %}class="featured-col"{% endif %}>{{ plan.name }}</th>{% endfor %}
         </tr>
       </thead>
       <tbody>
-        <tr><td>Unlimited Gym Access</td>{% for p in plans %}<td {% if p.featured %}class="featured-col"{% endif %}><span class="check-y">✓</span></td>{% endfor %}</tr>
-        <tr><td>All Equipment</td>{% for p in plans %}<td {% if p.featured %}class="featured-col"{% endif %}><span class="check-y">✓</span></td>{% endfor %}</tr>
-        <tr><td>Full AC Facility</td>{% for p in plans %}<td {% if p.featured %}class="featured-col"{% endif %}><span class="check-y">✓</span></td>{% endfor %}</tr>
-        <tr><td>Trainer on Floor</td>{% for p in plans %}<td {% if p.featured %}class="featured-col"{% endif %}><span class="check-y">✓</span></td>{% endfor %}</tr>
-        <tr><td>Locker Access</td>{% for p in plans %}<td {% if p.featured %}class="featured-col"{% endif %}><span class="check-y">✓</span></td>{% endfor %}</tr>
-        <tr><td>Diet Consultation</td><td><span class="check-n">–</span></td><td class="featured-col"><span class="check-y">✓</span></td><td><span class="check-y">✓</span></td></tr>
-        <tr><td>Personal Training Sessions</td><td><span class="check-n">–</span></td><td class="featured-col"><span class="check-n">–</span></td><td><span class="check-y">✓</span></td></tr>
-        <tr><td>Nutrition Plan</td><td><span class="check-n">–</span></td><td class="featured-col"><span class="check-n">–</span></td><td><span class="check-y">✓</span></td></tr>
-        <tr><td>Body Composition Tracking</td><td><span class="check-n">–</span></td><td class="featured-col"><span class="check-n">–</span></td><td><span class="check-y">✓</span></td></tr>
+        {% for row in compare_matrix %}
+        <tr>
+          <td>{{ row['label'] }}</td>
+          {% for val in row['values'] %}
+            {% set idx = loop.index0 %}
+            <td {% if compare_plans[idx]['featured'] %}class="featured-col"{% endif %}>
+              {% if val %}<span class="check-y">&#10003;</span>{% else %}<span class="check-n">&#8211;</span>{% endif %}
+            </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
       </tbody>
     </table>
   </div>
