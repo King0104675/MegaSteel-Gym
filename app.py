@@ -174,7 +174,6 @@ PLANS = [
             "Unlimited gym access",
             "All equipment",
             "Full AC facility",
-            "Trainer on floor",
             "Locker access",
         ],
     },
@@ -188,7 +187,6 @@ PLANS = [
             "Unlimited gym access",
             "All equipment",
             "Full AC facility",
-            "Trainer on floor",
             "Locker access",
             "Diet consultation included",
         ],
@@ -203,15 +201,90 @@ PLANS = [
             "Unlimited gym access",
             "All equipment",
             "Full AC facility",
-            "Dedicated personal trainer",
             "Locker access",
             "Diet consultation included",
-            "12 PT sessions",
             "Custom nutrition plan",
             "Body composition tracking",
         ],
     },
+    {
+        "name": "Half-Yearly",
+        "price": "6,000",
+        "period": "per 6 months",
+        "note": "Save ₹1,200 vs monthly",
+        "featured": False,
+        "features": [
+            "Unlimited gym access",
+            "All equipment",
+            "Full AC facility",
+            "Locker access",
+            "Diet consultation included",
+            "4 PT sessions",
+        ],
+    },
+    {
+        "name": "Yearly",
+        "price": "10,800",
+        "period": "per year",
+        "note": "Best value — Save ₹3,600 vs monthly",
+        "featured": True,
+        "features": [
+            "Unlimited gym access",
+            "All equipment",
+            "Full AC facility",
+            "Locker access",
+            "Diet consultation included",
+            "Custom nutrition plan",
+            "Body composition tracking",
+        ],
+    },
+    {
+        "name": "Personal Trainer",
+        "price": "4,500",
+        "period": "per month",
+        "note": "Dedicated one-on-one coaching",
+        "featured": False,
+        "features": [
+            "One-on-one training sessions",
+            "Custom training plan",
+            "Diet consultation included",
+            "Nutrition guidance",
+            "Body composition tracking",
+            "Flexible scheduling",
+        ],
+    },
 ]
+
+# Features used to build the comparison chart. Each entry contains a display label
+# and a list of keywords to match against a plan's `features` (case-insensitive
+# substring match). This keeps the comparison logic accurate even when plans
+# use slightly different phrasing (e.g. "12 PT sessions" vs "Personal training").
+COMPARISON_FEATURES = [
+    {"label": "Unlimited Gym Access", "keywords": ["unlimited gym", "gym access"]},
+    {"label": "All Equipment", "keywords": ["all equipment"]},
+    {"label": "Full AC Facility", "keywords": ["full ac", "ac facility"]},
+    {"label": "Locker Access", "keywords": ["locker access", "locker"]},
+    {"label": "Diet Consultation", "keywords": ["diet consultation", "diet plan"]},
+    {"label": "Nutrition Plan", "keywords": ["nutrition plan", "custom nutrition", "nutrition guidance"]},
+    {"label": "Body Composition Tracking", "keywords": ["body composition tracking"]},
+]
+
+
+def build_compare_matrix(plans, features):
+    """Return a list of rows where each row is {label: str, values: [bool,...]}.
+    Matching is done case-insensitively against plan feature strings using the
+    feature keywords defined in `features`.
+    """
+    matrix = []
+    for f in features:
+        row = {"label": f["label"], "values": []}
+        kws = [k.lower() for k in f.get("keywords", [])]
+        for p in plans:
+            pf = " ".join(p.get("features", [])).lower()
+            has = any(kw in pf for kw in kws)
+            row["values"].append(bool(has))
+        matrix.append(row)
+    return matrix
 
 FAQS = [
     {
@@ -224,7 +297,7 @@ FAQS = [
     },
     {
         "q": "Do you offer personal training?",
-        "a": "Yes. Personal training is available as a standalone package or included in our Premium membership. Sessions are one-on-one with a certified trainer.",
+        "a": "Yes. Personal training is available as a separate plan at a per-month fee. Sessions are one-on-one with a certified trainer.",
     },
     {
         "q": "What are your timings?",
@@ -240,7 +313,7 @@ FAQS = [
     },
     {
         "q": "Do you provide diet plans?",
-        "a": "Diet consultation is included in the Quarterly and Premium plans. Our nutrition coach creates personalised meal plans aligned with your training goal.",
+        "a": "Diet consultation is included in the Quarterly, Half-Yearly, and Yearly plans. Our nutrition coach creates personalised meal plans aligned with your training goal.",
     },
     {
         "q": "How do I pause or cancel my membership?",
@@ -320,7 +393,9 @@ def trainers():
 @app.route("/membership")
 def membership():
     ctx = base_ctx("Membership", "/membership")
-    ctx.update(plans=PLANS, faqs=FAQS)
+    compare_plans = [p for p in PLANS if p["name"] != "Personal Trainer"]
+    compare_matrix = build_compare_matrix(compare_plans, COMPARISON_FEATURES)
+    ctx.update(plans=PLANS, faqs=FAQS, compare_plans=compare_plans, compare_matrix=compare_matrix)
     return render_template("membership.html", **ctx)
 
 @app.route("/gallery")
