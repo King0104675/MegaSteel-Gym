@@ -1,0 +1,367 @@
+from flask import Flask, render_template, request, jsonify
+import os
+
+_base_dir = os.path.dirname(__file__)
+# Prefer a top-level `templates/` directory if present, otherwise fall back to
+# `megasteel-website/templates` for backwards compatibility.
+_cand_root = os.path.join(_base_dir, "templates")
+_cand_nested = os.path.join(_base_dir, "megasteel-website", "templates")
+if os.path.isdir(_cand_root):
+    templates_path = _cand_root
+elif os.path.isdir(_cand_nested):
+    templates_path = _cand_nested
+else:
+    templates_path = _cand_root
+app = Flask(__name__, template_folder=templates_path)
+
+# ── SITE DATA ──────────────────────────────────────────────────────────────────
+
+GYM = {
+    "name": "MegaSteel Fitness",
+    "tagline": "Kolkata's premier fully air-conditioned fitness facility",
+    "rating": 4.7,
+    "review_count": 400,
+    "year_founded": 2017,
+    "phone": "+91 98765 43210",
+    "phone_raw": "+919876543210",
+    "address": "CK Block, Sector II",
+    "city": "Salt Lake, Kolkata – 700091",
+    "whatsapp": "https://wa.me/919876543210",
+    "maps_url": "https://maps.app.goo.gl/megasteel",
+    "instagram": "https://instagram.com/megasteel_fitness",
+    "facebook": "https://facebook.com/megasteel_fitness",
+}
+
+PAGES = [
+    {"nav": "Home",       "url": "/"},
+    {"nav": "About",      "url": "/about"},
+    {"nav": "Programs",   "url": "/programs"},
+    {"nav": "Trainers",   "url": "/trainers"},
+    {"nav": "Membership", "url": "/membership"},
+    {"nav": "Gallery",    "url": "/gallery"},
+    {"nav": "Contact",    "url": "/contact"},
+]
+
+HOURS = [
+    {"day": "Monday",    "open": "6:00 AM",  "close": "11:00 PM"},
+    {"day": "Tuesday",   "open": "6:00 AM",  "close": "11:00 PM"},
+    {"day": "Wednesday", "open": "6:00 AM",  "close": "11:00 PM"},
+    {"day": "Thursday",  "open": "6:00 AM",  "close": "11:00 PM"},
+    {"day": "Friday",    "open": "6:00 AM",  "close": "11:00 PM"},
+    {"day": "Saturday",  "open": "6:00 AM",  "close": "10:00 PM"},
+    {"day": "Sunday",    "open": "8:00 AM",  "close": "6:00 PM"},
+]
+
+FACILITIES = [
+    {"icon": "❄️",  "name": "Full AC",             "desc": "Train in full air conditioning year-round. No compromise for Kolkata's heat."},
+    {"icon": "🏋️", "name": "Premium Equipment",    "desc": "Commercial-grade machines, full dumbbell range up to 50 kg, multiple cable stations."},
+    {"icon": "👤",  "name": "Expert Trainers",      "desc": "Certified trainers on the floor every session — actively coaching, not just supervising."},
+    {"icon": "📊",  "name": "Structured Programs",  "desc": "Goal-based programs for weight loss, muscle gain, transformation, and strength."},
+    {"icon": "🥗",  "name": "Diet Consultation",    "desc": "Personalised nutrition guidance included in select plans. Eat right, train hard."},
+    {"icon": "🔒",  "name": "Locker Facilities",    "desc": "Secure lockers and clean changing rooms for a smooth before-and-after routine."},
+]
+
+TRAINERS = [
+    {
+        "name": "Rahul Sharma",
+        "role": "Head Trainer",
+        "speciality": "Strength & Powerlifting",
+        "since": 2017,
+        "emoji": "💪",
+        "bio": "Rahul has been at MegaSteel since day one. A competitive powerlifter with 8+ years of coaching experience, he specialises in compound movement technique and progressive overload programming.",
+    },
+    {
+        "name": "Priya Ghosh",
+        "role": "Senior Trainer",
+        "speciality": "Body Transformation & Weight Loss",
+        "since": 2018,
+        "emoji": "🔥",
+        "bio": "Priya has guided hundreds of members through complete body transformations. Her approach combines HIIT, resistance training, and nutrition coaching to deliver consistent, lasting results.",
+    },
+    {
+        "name": "Arjun Das",
+        "role": "Certified Trainer",
+        "speciality": "Muscle Building & Hypertrophy",
+        "since": 2019,
+        "emoji": "🏆",
+        "bio": "Arjun is the go-to trainer for members looking to pack on quality muscle. His evidence-based hypertrophy programming has helped dozens of members hit their biggest physique goals.",
+    },
+    {
+        "name": "Sneha Roy",
+        "role": "Certified Trainer",
+        "speciality": "Functional Fitness & Flexibility",
+        "since": 2021,
+        "emoji": "⚡",
+        "bio": "Sneha brings a mobility-first approach to fitness. Whether you're a desk worker with tight hips or an athlete wanting better range of motion, she builds programs that move well and perform better.",
+    },
+    {
+        "name": "Vikram Bose",
+        "role": "Nutrition Coach",
+        "speciality": "Sports Nutrition & Diet Planning",
+        "since": 2020,
+        "emoji": "🥗",
+        "bio": "Vikram's focus is the 70% that happens outside the gym. He designs personalised meal plans aligned with your training goals — whether you're cutting, bulking, or maintaining.",
+    },
+    {
+        "name": "Debjit Mukherjee",
+        "role": "Certified Trainer",
+        "speciality": "Beginner Programs & General Fitness",
+        "since": 2022,
+        "emoji": "🌟",
+        "bio": "Debjit specialises in getting beginners started the right way — no fear, no injury, just steady progress. Patient, clear, and encouraging, he's exactly who you want in your corner on day one.",
+    },
+]
+
+PROGRAMS = [
+    {
+        "icon": "🔥",
+        "name": "Body Transformation",
+        "level": "All Levels",
+        "goal": "Complete physique overhaul",
+        "duration": "12 Weeks",
+        "desc": "A full-body recomposition program combining resistance training, cardio programming, and diet guidance. Built for members who want visible, lasting change.",
+    },
+    {
+        "icon": "💪",
+        "name": "Strength & Powerlifting",
+        "level": "Intermediate – Advanced",
+        "goal": "Maximal strength",
+        "duration": "8–16 Weeks",
+        "desc": "Progressive overload programming focused on the squat, bench, and deadlift. Technical coaching, accessory work, and periodisation built for real strength gains.",
+    },
+    {
+        "icon": "🏃",
+        "name": "Weight Loss",
+        "level": "Beginner – Intermediate",
+        "goal": "Fat loss & conditioning",
+        "duration": "8 Weeks",
+        "desc": "Structured cardio and resistance circuits designed to maximise caloric burn while preserving muscle. Paired with a sustainable calorie deficit plan.",
+    },
+    {
+        "icon": "🏆",
+        "name": "Muscle Building",
+        "level": "Beginner – Advanced",
+        "goal": "Hypertrophy",
+        "duration": "10–12 Weeks",
+        "desc": "Evidence-based hypertrophy training with volume, intensity, and frequency dials tuned to your level. Progressive and tracked every step.",
+    },
+    {
+        "icon": "🧘",
+        "name": "Functional Fitness",
+        "level": "All Levels",
+        "goal": "Movement quality & endurance",
+        "duration": "6 Weeks",
+        "desc": "Mobility, core stability, and functional strength combined. Ideal for those returning from injury, desk workers, or anyone wanting to move better in daily life.",
+    },
+    {
+        "icon": "⭐",
+        "name": "Personal Training",
+        "level": "All Levels",
+        "goal": "Custom goal",
+        "duration": "Flexible",
+        "desc": "One-on-one sessions with a dedicated trainer. Program, diet, and pace built entirely around you. The fastest path to your specific goal.",
+    },
+]
+
+PLANS = [
+    {
+        "name": "Monthly",
+        "price": "1,200",
+        "period": "per month",
+        "note": None,
+        "featured": False,
+        "features": [
+            "Unlimited gym access",
+            "All equipment",
+            "Full AC facility",
+            "Trainer on floor",
+            "Locker access",
+        ],
+    },
+    {
+        "name": "Quarterly",
+        "price": "3,000",
+        "period": "per 3 months",
+        "note": "Save ₹600 vs monthly",
+        "featured": True,
+        "features": [
+            "Unlimited gym access",
+            "All equipment",
+            "Full AC facility",
+            "Trainer on floor",
+            "Locker access",
+            "Diet consultation included",
+        ],
+    },
+    {
+        "name": "Premium",
+        "price": "5,500",
+        "period": "per 3 months",
+        "note": "Full-service package",
+        "featured": False,
+        "features": [
+            "Unlimited gym access",
+            "All equipment",
+            "Full AC facility",
+            "Dedicated personal trainer",
+            "Locker access",
+            "Diet consultation included",
+            "12 PT sessions",
+            "Custom nutrition plan",
+            "Body composition tracking",
+        ],
+    },
+]
+
+FAQS = [
+    {
+        "q": "Is there a joining fee?",
+        "a": "No joining or registration fee. You pay only the membership amount — nothing hidden, nothing extra.",
+    },
+    {
+        "q": "Can I try before I commit?",
+        "a": "Yes. We offer a free trial session with no commitment. Walk in, meet the team, try the gym, and decide on your own terms.",
+    },
+    {
+        "q": "Do you offer personal training?",
+        "a": "Yes. Personal training is available as a standalone package or included in our Premium membership. Sessions are one-on-one with a certified trainer.",
+    },
+    {
+        "q": "What are your timings?",
+        "a": "Mon–Fri: 6 AM – 11 PM. Saturday: 6 AM – 10 PM. Sunday: 8 AM – 6 PM. We're open every day.",
+    },
+    {
+        "q": "Is the gym air-conditioned?",
+        "a": "Yes — the entire training floor is fully air-conditioned. This was a deliberate upgrade we made for Kolkata's climate.",
+    },
+    {
+        "q": "Can women train here?",
+        "a": "Absolutely. MegaSteel is fully co-ed and maintains a respectful, disciplined environment. Several of our trainers specialise in women's fitness and transformation.",
+    },
+    {
+        "q": "Do you provide diet plans?",
+        "a": "Diet consultation is included in the Quarterly and Premium plans. Our nutrition coach creates personalised meal plans aligned with your training goal.",
+    },
+    {
+        "q": "How do I pause or cancel my membership?",
+        "a": "Speak to us directly. We handle membership changes on a case-by-case basis and always try to find the best solution for our members.",
+    },
+]
+
+REVIEWS = [
+    {
+        "stars": 5,
+        "text": "Best gym in Salt Lake, no contest. The trainers are genuinely invested — they know your name, your form, and when you're holding back. Lost 14 kg in 4 months here.",
+        "name": "Sourav M.",
+        "tag": "Member since 2021",
+    },
+    {
+        "stars": 5,
+        "text": "The AC alone is worth it in Kolkata summers, but what keeps me here is the quality of coaching. Rahul fixed my deadlift form in one session. My back has never felt better.",
+        "name": "Ananya B.",
+        "tag": "Member since 2022",
+    },
+    {
+        "stars": 5,
+        "text": "Joined as a complete beginner and had zero idea what I was doing. Six months later, I've gained 8 kg of muscle and actually look forward to going to the gym. That's new for me.",
+        "name": "Rohan D.",
+        "tag": "Member since 2023",
+    },
+    {
+        "stars": 5,
+        "text": "Equipment is top notch and always well-maintained. Never had to wait for a machine. The staff are professional and the space is clean. Exactly what a premium gym should be.",
+        "name": "Pritha S.",
+        "tag": "Member since 2020",
+    },
+    {
+        "stars": 5,
+        "text": "Tried a lot of gyms across the city. MegaSteel is the only one where the trainers actually correct your form proactively. That attention to detail is rare and it makes a real difference.",
+        "name": "Aritra G.",
+        "tag": "Member since 2019",
+    },
+]
+
+# ── CONTEXT HELPER ─────────────────────────────────────────────────────────────
+
+def base_ctx(page_title: str, current_page: str) -> dict:
+    return {
+        "gym": GYM,
+        "pages": PAGES,
+        "current_page": current_page,
+        "page_title": page_title,
+        "hours": HOURS,
+        "trainers": TRAINERS,
+    }
+
+# ── ROUTES ─────────────────────────────────────────────────────────────────────
+
+@app.route("/")
+def index():
+    ctx = base_ctx("Home", "/")
+    ctx.update(facilities=FACILITIES, programs=PROGRAMS[:4], reviews=REVIEWS)
+    return render_template("index.html", **ctx)
+
+@app.route("/about")
+def about():
+    ctx = base_ctx("About Us", "/about")
+    return render_template("about.html", **ctx)
+
+@app.route("/programs")
+def programs():
+    ctx = base_ctx("Programs", "/programs")
+    ctx.update(programs=PROGRAMS)
+    return render_template("programs.html", **ctx)
+
+@app.route("/trainers")
+def trainers():
+    ctx = base_ctx("Our Trainers", "/trainers")
+    return render_template("trainers.html", **ctx)
+
+@app.route("/membership")
+def membership():
+    ctx = base_ctx("Membership", "/membership")
+    ctx.update(plans=PLANS, faqs=FAQS)
+    return render_template("membership.html", **ctx)
+
+@app.route("/gallery")
+def gallery():
+    ctx = base_ctx("Gallery", "/gallery")
+    return render_template("gallery.html", **ctx)
+
+@app.route("/contact")
+def contact():
+    ctx = base_ctx("Contact", "/contact")
+    return render_template("contact.html", **ctx)
+
+# ── FORM ENDPOINTS (simple – swap in a real backend/email sender as needed) ───
+
+@app.route("/api/trial", methods=["POST"])
+def api_trial():
+    data = request.get_json(silent=True) or {}
+    name  = data.get("name", "").strip()
+    phone = data.get("phone", "").strip()
+    goal  = data.get("goal", "").strip()
+    if not name or not phone:
+        return jsonify({"ok": False, "error": "Name and phone are required."}), 400
+    # TODO: send WhatsApp / email notification here
+    print(f"[TRIAL] {name} | {phone} | {goal}")
+    return jsonify({"ok": True})
+
+@app.route("/api/contact", methods=["POST"])
+def api_contact():
+    data      = request.get_json(silent=True) or {}
+    first     = data.get("first", "").strip()
+    last      = data.get("last", "").strip()
+    phone     = data.get("phone", "").strip()
+    interest  = data.get("interest", "").strip()
+    message   = data.get("message", "").strip()
+    if not first or not phone:
+        return jsonify({"ok": False, "error": "First name and phone are required."}), 400
+    # TODO: send notification here
+    print(f"[CONTACT] {first} {last} | {phone} | {interest} | {message}")
+    return jsonify({"ok": True})
+
+# ── ENTRY POINT ────────────────────────────────────────────────────────────────
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)

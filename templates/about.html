@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block extra_css %}
+.story-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;margin-top:3rem}
+.story-text p{font-size:.95rem;color:var(--muted);line-height:1.85;font-weight:300;margin-bottom:1.25rem}
+.story-text p strong{color:var(--white);font-weight:500}
+.story-visual{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.story-stat{background:var(--steel);border:1px solid var(--border);border-radius:3px;padding:2rem 1.5rem;text-align:center}
+.story-stat .big{font-family:var(--font-display);font-size:3rem;font-weight:900;color:var(--fire);line-height:1}
+.story-stat .lbl{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:.4rem}
+
+.values-section{background:var(--steel)}
+.values-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;margin-top:3rem}
+.value-card{background:var(--plate);border-left:3px solid var(--fire);padding:2rem}
+.value-card h3{font-family:var(--font-display);font-size:1.3rem;font-weight:700;text-transform:uppercase;color:var(--white);margin-bottom:.6rem}
+.value-card p{font-size:.88rem;color:var(--muted);line-height:1.75;font-weight:300}
+
+.milestone-section{background:var(--iron)}
+.timeline{margin-top:3rem;position:relative;padding-left:2rem;border-left:2px solid var(--border)}
+.timeline-item{position:relative;margin-bottom:2.5rem;padding-left:2rem}
+.timeline-item::before{content:'';position:absolute;left:-2.6rem;top:.4rem;width:10px;height:10px;background:var(--fire);border-radius:50%;border:2px solid var(--iron)}
+.timeline-year{font-family:var(--font-display);font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;color:var(--fire);font-weight:700;margin-bottom:.3rem}
+.timeline-item h3{font-family:var(--font-display);font-size:1.3rem;font-weight:700;text-transform:uppercase;color:var(--white);margin-bottom:.3rem}
+.timeline-item p{font-size:.88rem;color:var(--muted);font-weight:300;line-height:1.7}
+
+@media(max-width:768px){.story-grid{grid-template-columns:1fr}.story-visual{grid-template-columns:1fr 1fr}}
+{% endblock %}
+
+{% block content %}
+<div class="inner-hero">
+  <div class="inner-hero-content">
+    <div class="section-label">Our story</div>
+    <h1>ABOUT<br><span class="outline">US</span></h1>
+  </div>
+</div>
+
+<!-- STORY -->
+<section style="background:var(--iron)">
+  <div class="section-label">Who we are</div>
+  <h2 class="section-title">More Than<br>a Gym</h2>
+  <div class="story-grid">
+    <div class="story-text">
+      <p>MegaSteel Fitness was founded with one conviction: that <strong>everyone deserves access to a world-class training environment</strong> without the world-class price tag. We built this gym in the heart of Salt Lake to bring premium fitness to Kolkata.</p>
+      <p>Since opening, we've helped hundreds of members transform — from beginners who'd never touched a barbell to seasoned athletes breaking their personal records. Our approach is simple: <strong>expert coaching, quality equipment, and a community that holds you accountable</strong>.</p>
+      <p>We're proud of our {{ gym.rating }}-star rating across {{ gym.review_count }}+ Google reviews — but what we're most proud of are the stories behind them. The person who lost 20 kg. The one who finally learned to deadlift. The pair of friends who started training together and haven't stopped.</p>
+      <p>That's what MegaSteel is about.</p>
+      <div style="margin-top:2rem"><a href="{{ url_for('contact') }}" class="btn-primary">Get In Touch</a></div>
+    </div>
+    <div class="story-visual">
+      <div class="story-stat"><div class="big">{{ gym.rating }}★</div><div class="lbl">Google Rating</div></div>
+      <div class="story-stat"><div class="big">{{ gym.review_count }}+</div><div class="lbl">Reviews</div></div>
+      <div class="story-stat"><div class="big">500+</div><div class="lbl">Active Members</div></div>
+      <div class="story-stat"><div class="big">{{ trainers|length }}+</div><div class="lbl">Expert Trainers</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="values-section">
+  <div class="section-label">What we stand for</div>
+  <h2 class="section-title">Our Core<br>Values</h2>
+  <div class="values-grid">
+    <div class="value-card">
+      <h3>Results First</h3>
+      <p>Every decision we make — from equipment selection to trainer hiring — is driven by one question: does this help our members get better results?</p>
+    </div>
+    <div class="value-card">
+      <h3>Inclusive Environment</h3>
+      <p>MegaSteel is for everyone. We maintain a safe, disciplined space where men and women at all fitness levels feel welcome and respected.</p>
+    </div>
+    <div class="value-card">
+      <h3>Expert Guidance</h3>
+      <p>Our trainers aren't just present — they're engaged. Proper form, personalised advice, and genuine investment in your progress sets us apart.</p>
+    </div>
+    <div class="value-card">
+      <h3>Real Value</h3>
+      <p>Premium equipment and full AC facilities at prices that make sense. We believe quality fitness shouldn't come with a luxury markup.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="milestone-section">
+  <div class="section-label">Milestones</div>
+  <h2 class="section-title">Our Journey<br>So Far</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-year">{{ gym.year_founded }}</div>
+      <h3>MegaSteel Opens</h3>
+      <p>Opened our doors at CK Block, Salt Lake with a vision to bring premium fitness to Kolkata at an accessible price point.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2019</div>
+      <h3>Full AC Facility Upgrade</h3>
+      <p>Completed a major infrastructure upgrade — full air conditioning across the entire floor. A game-changer for Kolkata's climate.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2021</div>
+      <h3>100+ Member Milestone</h3>
+      <p>Hit 100 active members. Expanded the free weights zone and added new cable stations to meet growing demand.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2023</div>
+      <h3>Topped 400 Google Reviews</h3>
+      <p>Crossed 400 reviews with a 4.7-star average — a testament to the community and trainers who make MegaSteel what it is.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2025</div>
+      <h3>500+ Active Members</h3>
+      <p>Today, MegaSteel serves over 500 active members. New programs, new equipment, same mission.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

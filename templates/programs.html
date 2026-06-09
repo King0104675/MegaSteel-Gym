@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block extra_css %}
+.prog-full-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:2rem;margin-top:3rem}
+.prog-full-card{background:var(--steel);border:1px solid var(--border);border-radius:3px;padding:2.5rem;transition:border-color .2s,transform .2s;position:relative;overflow:hidden}
+.prog-full-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--fire);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.prog-full-card:hover{border-color:rgba(255,61,0,.35);transform:translateY(-4px)}
+.prog-full-card:hover::before{transform:scaleX(1)}
+.prog-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem}
+.prog-big-icon{font-size:2.5rem}
+.prog-pill{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--fire);font-weight:700;background:rgba(255,61,0,.1);border:1px solid rgba(255,61,0,.2);padding:.25rem .75rem;border-radius:30px}
+.prog-full-card h3{font-family:var(--font-display);font-size:1.7rem;font-weight:900;text-transform:uppercase;color:var(--white);margin-bottom:.3rem}
+.prog-goal{font-size:.78rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem;font-weight:500}
+.prog-desc{font-size:.9rem;color:var(--muted);line-height:1.8;font-weight:300;margin-bottom:1.5rem}
+.prog-meta{display:flex;gap:1.5rem;padding-top:1.2rem;border-top:1px solid var(--border)}
+.prog-meta-item span:first-child{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.2rem}
+.prog-meta-item span:last-child{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--white)}
+
+.process-section{background:var(--steel)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:3rem;position:relative}
+.steps::before{content:'';position:absolute;top:2rem;left:10%;right:10%;height:1px;background:var(--border);z-index:0}
+.step{text-align:center;position:relative;z-index:1}
+.step-num{width:60px;height:60px;background:var(--plate);border:2px solid var(--fire);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.4rem;font-weight:900;color:var(--fire);margin:0 auto 1.25rem}
+.step h3{font-family:var(--font-display);font-size:1rem;font-weight:700;text-transform:uppercase;color:var(--white);margin-bottom:.4rem}
+.step p{font-size:.82rem;color:var(--muted);line-height:1.65;font-weight:300}
+@media(max-width:768px){.steps{grid-template-columns:1fr 1fr}.steps::before{display:none}}
+@media(max-width:480px){.steps{grid-template-columns:1fr}}
+{% endblock %}
+
+{% block content %}
+<div class="inner-hero">
+  <div class="inner-hero-content">
+    <div class="section-label">Train with purpose</div>
+    <h1>OUR<br><span class="outline">PROGRAMS</span></h1>
+  </div>
+</div>
+
+<!-- PROGRAMS -->
+<section style="background:var(--iron)">
+  <div class="section-label">All programs</div>
+  <h2 class="section-title">Choose Your<br>Path</h2>
+  <p class="section-sub">Every program is designed by our trainers around specific goals. Pick what matches yours and we'll take it from there.</p>
+  <div class="prog-full-grid">
+    {% for prog in programs %}
+    <div class="prog-full-card">
+      <div class="prog-header">
+        <div class="prog-big-icon">{{ prog.icon }}</div>
+        <div class="prog-pill">{{ prog.level }}</div>
+      </div>
+      <h3>{{ prog.name }}</h3>
+      <div class="prog-goal">Goal: {{ prog.goal }}</div>
+      <p class="prog-desc">{{ prog.desc }}</p>
+      <div class="prog-meta">
+        <div class="prog-meta-item"><span>Duration</span><span>{{ prog.duration }}</span></div>
+        <div class="prog-meta-item"><span>Level</span><span>{{ prog.level }}</span></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="process-section">
+  <div class="section-label">Getting started</div>
+  <h2 class="section-title">How It Works</h2>
+  <p class="section-sub">From your first visit to your first milestone — here's what to expect.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Free Trial</h3>
+      <p>Book a free session. Walk in, meet the team, and try the gym with zero obligation.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Goal Assessment</h3>
+      <p>Sit down with a trainer. We understand your goals, fitness level, and any limitations.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Your Plan</h3>
+      <p>We assign the right program and pair you with the best trainer for your objectives.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h3>Get Results</h3>
+      <p>Show up, follow the plan, and let us handle the rest. Progress is tracked and celebrated.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
